@@ -1,0 +1,3163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Soccer Referee Match Report Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f4f0e9;
+      --fg: #111111;
+      --accent: #ffbf00;
+      --accent-soft: #ffe9a8;
+      --accent-2: #00c2ff;
+      --accent-3: #ff3b3b;
+      --card-bg: #ffffff;
+      --muted: #777777;
+      --border: #111111;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      border-bottom: 4px solid var(--border);
+      background: #fef3c7;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: 0 6px 0 var(--border);
+    }
+
+    .app-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .app-title {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .app-subtitle {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .header-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.1rem;
+      text-align: right;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .header-line {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+    }
+
+    .header-label {
+      color: var(--muted);
+    }
+
+    .header-value {
+      font-weight: 700;
+    }
+
+    .app-main {
+      flex: 1;
+      padding: 1rem;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .app-footer {
+      border-top: 3px solid var(--border);
+      padding: 0.5rem 1.25rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fefcf5;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.is-active {
+      display: block;
+    }
+
+    .card {
+      border: 3px solid var(--border);
+      box-shadow: 5px 5px 0 var(--border);
+      background: var(--card-bg);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 0;
+    }
+
+    .card-strong {
+      border-width: 4px;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin: 0 0 0.75rem 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 0.6rem;
+      height: 0.6rem;
+      background: var(--accent-2);
+      border: 2px solid var(--border);
+      box-shadow: 2px 2px 0 var(--border);
+    }
+
+    label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .field-row-three {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    textarea {
+      border: 3px solid var(--border);
+      border-radius: 0;
+      padding: 0.45rem 0.5rem;
+      font-size: 0.85rem;
+      background: #fffdf6;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent-2);
+      box-shadow: 3px 3px 0 var(--border);
+    }
+
+    .helper {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .btn {
+      border-radius: 0;
+      border: 3px solid var(--border);
+      padding: 0.45rem 0.8rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 4px 4px 0 var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+    }
+
+    .btn-secondary {
+      background: var(--accent-2);
+    }
+
+    .btn-ghost {
+      background: #ffffff;
+    }
+
+    .btn-danger {
+      background: var(--accent-3);
+      color: #ffffff;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: 0 0 0 var(--border);
+      transform: translate(3px, 3px);
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 var(--border);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translate(3px, 3px);
+      box-shadow: 0 0 0 var(--border);
+    }
+
+    .btn-wide {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-small {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      border-width: 2px;
+      box-shadow: 3px 3px 0 var(--border);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 800;
+      padding: 0.3rem 0.5rem;
+      border: 2px solid var(--border);
+      border-radius: 999px;
+      background: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .badge-dot {
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 50%;
+      background: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .badge-live .badge-dot {
+      background: #22c55e;
+    }
+
+    .badge-paused .badge-dot {
+      background: #f97316;
+    }
+
+    .badge-pre .badge-dot {
+      background: #9ca3af;
+    }
+
+    .badge-full .badge-dot {
+      background: #ef4444;
+    }
+
+    .badge-half {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .badge-half .badge-dot {
+      background: #ffffff;
+    }
+
+    /* Live Layout */
+
+    .live-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .live-main {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .timer-card {
+      background: radial-gradient(circle at 0 0, #1f2937 0, #020617 38%, #000000 100%);
+      color: #fefce8;
+      position: relative;
+      overflow: hidden;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #fef08a;
+      box-shadow:
+        0 0 0 3px #000000,
+        0 18px 0 0 #000000;
+    }
+
+    .timer-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .timer-header-row-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .fixture-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #d4d4d4;
+    }
+
+    .fixture-value {
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+    }
+
+    .timer-watch {
+      border: 3px solid #fef9c3;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.9rem;
+      background: linear-gradient(135deg, #020617 0%, #020617 45%, #0b1120 100%);
+      box-shadow:
+        0 0 0 3px #000000,
+        inset 0 0 0 1px #4b5563;
+    }
+
+    .timer-score-row {
+      display: grid;
+      grid-template-columns: 1.3fr auto 1.3fr;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      gap: 0.5rem;
+    }
+
+    .team-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #fefce8;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
+    .score-main {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 2.7rem;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-shadow:
+        0 0 0 #000,
+        0 4px 0 #000000;
+    }
+
+    .score-main span {
+      display: inline-block;
+      min-width: 2.1ch;
+    }
+
+    .timer-display {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 3.1rem;
+      text-align: center;
+      padding: 0.45rem 0;
+      letter-spacing: 0.16em;
+      border-top: 2px dashed #64748b;
+      border-bottom: 2px dashed #64748b;
+      margin-bottom: 0.6rem;
+      text-shadow:
+        0 0 0 #000,
+        0 4px 0 #000000;
+    }
+
+    .timer-display.is-hidden {
+      display: none;
+    }
+
+    .stoppage-display {
+      display: none;
+      font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 2.8rem;
+      text-align: center;
+      padding: 0.45rem 0;
+      letter-spacing: 0.16em;
+      border-top: 2px solid #f97373;
+      border-bottom: 2px solid #f97373;
+      margin-bottom: 0.6rem;
+      color: #fecaca;
+      text-shadow:
+        0 0 0 #000,
+        0 4px 0 #000000;
+    }
+
+    .stoppage-display.is-visible {
+      display: block;
+    }
+
+    .timer-sub {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #e5e7eb;
+    }
+
+    .stoppage-label {
+      padding: 0.15rem 0.4rem;
+      border-radius: 999px;
+      border: 1px dashed #e5e7eb;
+      display: inline-block;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .stoppage-label.is-hot {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .half-time-marker {
+      opacity: 0.6;
+    }
+
+    .lineup-section {
+      margin-top: 1.25rem;
+    }
+
+    .lineup-dual {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .lineup-card {
+      border-top: 1px dashed #d4d4d4;
+      padding-top: 0.75rem;
+    }
+
+    .lineup-card-heading {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0 0 0.35rem;
+      display: block;
+    }
+
+    .lineup-card-heading--subs {
+      margin-top: 0.5rem;
+    }
+
+    .lineup-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+
+    .lineup-grid--subs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .lineup-field input {
+      border: 2px solid #d4d4d4;
+      padding: 0.35rem 0.4rem;
+      font-size: 0.85rem;
+      border-radius: 0;
+      width: 100%;
+      background: #fffdf6;
+    }
+
+    .booking-form .field {
+      margin-bottom: 0.35rem;
+    }
+
+    .booking-lists {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .booking-column-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0 0 0.35rem;
+      color: #6b7280;
+    }
+
+    .booking-list,
+    .sub-history {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .booking-item,
+    .sub-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.35rem 0.4rem;
+      border-bottom: 1px dashed #e5e7eb;
+      font-size: 0.8rem;
+    }
+
+    .booking-item:last-child,
+    .sub-item:last-child {
+      border-bottom: none;
+    }
+
+    .sub-history {
+      margin-top: 0.75rem;
+      padding-left: 0.35rem;
+    }
+
+    .sub-item span {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .booking-card-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      height: 16px;
+      padding: 0 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      transform: skewX(-18deg);
+      color: #111;
+      border: 1px solid transparent;
+    }
+
+    .booking-card-pill--yellow {
+      background: #fde68a;
+      color: #92400e;
+      border-color: #fcd34d;
+    }
+
+    .booking-card-pill--red {
+      background: #fecdd3;
+      color: #7f1d1d;
+      border-color: #f87171;
+    }
+
+    .booking-item span:last-child {
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    @media print {
+      .print-hide {
+        display: none !important;
+      }
+      .report-actions {
+        display: none;
+      }
+      .live-side,
+      .app-footer,
+      .countdown-overlay,
+      .timer-controls,
+      .timer-controls.secondary,
+      .event-list,
+      .btn {
+        display: none !important;
+      }
+      body {
+        background: #fff !important;
+        margin: 0;
+        zoom: 0.85;
+      }
+      .app-shell,
+      .app-main {
+        width: 100%;
+        overflow: visible;
+      }
+      .report-layout {
+        grid-template-columns: 1fr 1fr;
+      }
+      .card,
+      .table-wrap {
+        page-break-inside: avoid;
+      }
+    }
+
+    @page {
+      size: A3 landscape;
+      margin: 0;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .timer-controls.secondary {
+      justify-content: space-between;
+    }
+
+    .timer-controls .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .timer-controls.secondary .btn {
+      flex: 0 0 auto;
+    }
+
+    .timer-controls-secondary-right {
+      margin-left: auto;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .countdown-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 8;
+    }
+
+    .countdown-overlay.is-visible {
+      display: flex;
+    }
+
+    .countdown-number {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 4rem;
+      font-weight: 900;
+      background: #facc15;
+      padding: 0.8rem 1.4rem;
+      border: 4px solid #000000;
+      box-shadow: 6px 6px 0 #000000;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .live-side {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .score-control {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .score-card {
+      border: 3px solid var(--border);
+      padding: 0.5rem;
+      background: #fef9c3;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .score-team-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .score-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .score-buttons {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .score-buttons .btn {
+      flex: 1;
+    }
+
+    .meta-card {
+      background: #ecfeff;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .meta-label {
+      color: var(--muted);
+    }
+
+    .meta-value {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .event-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 0.75rem;
+    }
+
+    .event-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+      border-bottom: 1px dashed #d4d4d4;
+    }
+
+    .event-time {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+      min-width: 3.8rem;
+    }
+
+    .event-type {
+      text-align: right;
+      flex: 1;
+    }
+
+    .event-empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Report view */
+
+    .report-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 1rem;
+    }
+
+    .report-layout.export-padding {
+      padding: 1.5rem 2rem;
+      box-sizing: border-box;
+    }
+
+    .report-header {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .report-chip {
+      border: 2px solid var(--border);
+      padding: 0.35rem 0.55rem;
+      background: #fef3c7;
+    }
+
+    .report-chip-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-bottom: 0.15rem;
+    }
+
+    .report-chip-value {
+      font-weight: 700;
+    }
+
+    .scoreline-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin: 0.5rem 0 0.75rem;
+    }
+
+    .scoreline-team {
+      flex: 1;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .scoreline-main {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-weight: 900;
+      font-size: 1.4rem;
+      padding: 0.2rem 0.4rem;
+      border: 3px solid var(--border);
+      background: var(--accent-soft);
+      min-width: 3.5rem;
+      text-align: center;
+    }
+
+    .official-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.8rem;
+    }
+
+    .official-list li {
+      padding: 0.2rem 0;
+    }
+
+    .badge-role {
+      display: inline-block;
+      padding: 0.1rem 0.3rem;
+      border: 1px solid var(--border);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-right: 0.35rem;
+      background: #e5e7eb;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 2px solid var(--border);
+      border-radius: 0;
+      background: #ffffff;
+      margin: 0.5rem 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.75rem;
+      min-width: 100%;
+    }
+
+    th, td {
+      padding: 0.35rem 0.45rem;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.65rem;
+      background: #fef3c7;
+      border-bottom: 2px solid var(--border);
+    }
+
+    tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+
+    .note-area {
+      width: 100%;
+      border: 3px solid var(--border);
+      border-radius: 0;
+      padding: 0.45rem;
+      font-size: 0.8rem;
+      background: #fffdf6;
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .note-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+
+    .note-label-row span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      color: var(--muted);
+    }
+
+    .chip-small {
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.3rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: #e0f2fe;
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pill-dot {
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--accent-3);
+    }
+
+    .pill-green .pill-dot {
+      background: #22c55e;
+    }
+
+    .pill-blue .pill-dot {
+      background: var(--accent-2);
+    }
+
+    /* Modal */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .modal.is-visible {
+      display: flex;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .modal-body {
+      position: relative;
+      max-width: 320px;
+      width: 90%;
+      background: #fef3c7;
+    }
+
+    .modal-body h2 {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .modal-text {
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* Pre-match */
+
+    .form-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .form-status {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .badge-required {
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.3rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 900px) {
+      .live-layout,
+      .report-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .timer-card {
+        order: -1;
+      }
+
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-meta {
+        align-items: flex-start;
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .field-row,
+      .field-row-three {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .timer-display {
+        font-size: 2.2rem;
+      }
+
+      .score-main {
+        font-size: 2rem;
+      }
+
+      .timer-controls .btn {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="app-header">
+    <div class="app-title-block">
+      <h1 class="app-title">Referee Match Console</h1>
+      <div class="app-subtitle">Neobrutalist match timer &amp; report</div>
+    </div>
+    <div class="header-meta">
+      <div class="header-line">
+        <span class="header-label">Fixture:</span>
+        <span class="header-value" id="header-fixture">Awaiting setup</span>
+      </div>
+      <div class="header-line">
+        <span class="header-label">Competition:</span>
+        <span class="header-value" id="header-competition">—</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- PRE-MATCH VIEW -->
+    <section id="pre-match-view" class="view is-active">
+      <div class="card card-strong">
+        <h2 class="section-title">Pre-match details</h2>
+        <form id="pre-match-form" autocomplete="off">
+          <div class="field-row-three">
+            <div class="field">
+              <label for="matchDate">Match date *</label>
+              <input type="date" id="matchDate" required />
+            </div>
+            <div class="field">
+              <label for="matchTime">Kickoff time *</label>
+              <input type="time" id="matchTime" required />
+            </div>
+            <div class="field">
+              <label for="matchNumber">Match number</label>
+              <input type="text" id="matchNumber" placeholder="Optional" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="competition">Competition *</label>
+              <input type="text" id="competition" required />
+            </div>
+            <div class="field">
+              <label for="venue">Venue *</label>
+              <input type="text" id="venue" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="homeTeam">Home team *</label>
+              <input type="text" id="homeTeam" required />
+            </div>
+            <div class="field">
+              <label for="awayTeam">Away team *</label>
+              <input type="text" id="awayTeam" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="refereeName">Referee *</label>
+              <input type="text" id="refereeName" required />
+            </div>
+            <div class="field">
+              <label for="assistant1Name">Assistant referee 1 *</label>
+              <input type="text" id="assistant1Name" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="assistant2Name">Assistant referee 2 *</label>
+              <input type="text" id="assistant2Name" required />
+            </div>
+            <div class="field">
+              <label for="fourthOfficialName">Fourth official</label>
+              <input type="text" id="fourthOfficialName" placeholder="Optional" />
+            </div>
+          </div>
+
+          <div class="lineup-section">
+            <div class="lineup-dual">
+              <div class="lineup-card">
+                <span class="lineup-card-heading">Home lineup</span>
+                <div id="lineup-home-card"></div>
+              </div>
+              <div class="lineup-card">
+                <span class="lineup-card-heading">Away lineup</span>
+                <div id="lineup-away-card"></div>
+              </div>
+            </div>
+            <div class="helper" style="margin-top:0.5rem;">
+              Enter jersey numbers only (one number per field). Starters cap 11, subs cap 5 per team.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="preMatchNotes">Pre-match notes</label>
+            <textarea id="preMatchNotes" placeholder="Weather, pitch, key instructions…"></textarea>
+          </div>
+
+          <div class="form-footer-row">
+            <div class="form-status">
+              <span id="pre-match-status-text">Fill required fields to continue.</span>
+            </div>
+            <div>
+              <span class="badge-required">* required</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 0.75rem;">
+            <button id="startMatchBtn" class="btn btn-primary btn-wide" type="submit" disabled>
+              Start Match Setup
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- LIVE VIEW -->
+    <section id="live-view" class="view">
+      <div class="live-layout">
+        <div class="live-main">
+          <div class="card timer-card">
+          <div class="timer-header-row">
+            <div class="timer-header-row-left">
+              <div class="fixture-label">Live match</div>
+              <div class="fixture-value" id="live-fixture-label">Home vs Away</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-end;">
+              <div class="badge badge-pre" id="match-status-pill">
+                <span class="badge-dot"></span>
+                <span id="match-status-text">Pre match</span>
+              </div>
+              <div class="badge badge-half" id="match-half-label">
+                <span class="badge-dot"></span>
+                <span id="match-half-text">First half</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timer-watch">
+            <div class="timer-score-row">
+              <div class="team-tag" id="home-tag">Home</div>
+              <div class="score-main">
+                <span id="home-score-main">0</span>
+                <span>-</span>
+                <span id="away-score-main">0</span>
+              </div>
+              <div class="team-tag" id="away-tag" style="text-align:right;">Away</div>
+            </div>
+            <div class="timer-display" id="main-timer">00:00</div>
+            <div class="timer-display stoppage-display" id="stoppage-display">+00:00</div>
+            <div class="timer-sub">
+              <span id="stoppage-label" class="stoppage-label">Stoppage this half: 00:00</span>
+              <span id="half-time-marker" class="half-time-marker">Ready for kick-off</span>
+            </div>
+          </div>
+
+          <div class="timer-controls">
+            <button id="btn-start" class="btn btn-primary">Start</button>
+            <button id="btn-pause" class="btn btn-secondary" disabled>Pause</button>
+            <button id="btn-reset" class="btn btn-ghost" disabled>Reset</button>
+          </div>
+
+          <div class="timer-controls secondary">
+            <div class="timer-controls-secondary-right">
+              <button id="btn-end-half" class="btn btn-secondary" style="display:none;">End first half</button>
+              <button id="btn-end-match" class="btn btn-danger" style="display:none;">End match</button>
+              <button id="btn-view-report" class="btn btn-primary" style="display:none;">View match report</button>
+            </div>
+          </div>
+
+          <div id="countdown-overlay" class="countdown-overlay">
+            <div class="countdown-number" id="countdown-number">3</div>
+          </div>
+          </div>
+
+          <div class="card" id="substitution-card">
+            <h2 class="section-title">Substitution tracker</h2>
+            <div class="field-row">
+              <div class="field">
+                <label for="sub-team">Team</label>
+                <select id="sub-team">
+                  <option value="">Select team</option>
+                  <option value="home">Home</option>
+                  <option value="away">Away</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="sub-on">Player ON</label>
+                <select id="sub-on">
+                  <option value="">Substitute</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="sub-off">Player OFF</label>
+                <select id="sub-off">
+                  <option value="">Starter</option>
+                </select>
+              </div>
+            </div>
+            <button id="sub-submit" type="button" class="btn btn-primary btn-small btn-wide">
+              Log substitution
+            </button>
+            <ul id="sub-history" class="sub-history"></ul>
+          </div>
+
+          <div class="card meta-card">
+            <h2 class="section-title">Match info</h2>
+            <div class="meta-grid">
+              <div class="meta-row">
+                <span class="meta-label">Competition</span>
+                <span class="meta-value" id="live-comp">—</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Venue</span>
+                <span class="meta-value" id="live-venue">—</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Date</span>
+                <span class="meta-value" id="live-date">—</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Kickoff</span>
+                <span class="meta-value" id="live-time">—</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Referee</span>
+                <span class="meta-value" id="live-ref">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="live-side">
+          <div class="card">
+            <h2 class="section-title">Score control</h2>
+            <div class="score-control">
+              <div class="score-card">
+                <div class="score-team-label" id="home-name-label">Home</div>
+                <div class="score-value" id="home-score-side">0</div>
+                <div class="score-buttons">
+                  <button class="btn btn-small btn-primary" data-score-team="home" data-score-delta="1">+1 goal</button>
+                  <button class="btn btn-small btn-ghost" data-score-team="home" data-score-delta="-1">-1 goal</button>
+                </div>
+              </div>
+              <div class="score-card">
+                <div class="score-team-label" id="away-name-label">Away</div>
+                <div class="score-value" id="away-score-side">0</div>
+                <div class="score-buttons">
+                  <button class="btn btn-small btn-primary" data-score-team="away" data-score-delta="1">+1 goal</button>
+                  <button class="btn btn-small btn-ghost" data-score-team="away" data-score-delta="-1">-1 goal</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="section-title">Recent events</h2>
+            <ul class="event-list" id="live-events">
+              <li class="event-empty">Events will show here once the match starts.</li>
+            </ul>
+          </div>
+
+          <div class="card" id="booking-card">
+            <h2 class="section-title">Booking tracker</h2>
+            <form id="booking-form" class="booking-form">
+              <div class="field-row">
+                <div class="field">
+                  <label for="booking-team">Team</label>
+                  <select id="booking-team">
+                    <option value="">Select team</option>
+                    <option value="home">Home</option>
+                    <option value="away">Away</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="booking-player">Player jersey</label>
+                  <select id="booking-player">
+                    <option value="">Select player</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="booking-type">Card</label>
+                  <select id="booking-type">
+                    <option value="Yellow">Yellow</option>
+                    <option value="Red">Red</option>
+                  </select>
+                </div>
+              </div>
+              <button id="booking-submit" type="button" class="btn btn-primary btn-small btn-wide">
+                Record booking
+              </button>
+            </form>
+            <div class="booking-lists">
+              <div class="booking-column">
+                <div class="booking-column-title" id="booking-home-title">Home bookings</div>
+                <ul id="booking-home-list" class="booking-list"></ul>
+              </div>
+              <div class="booking-column">
+                <div class="booking-column-title" id="booking-away-title">Away bookings</div>
+                <ul id="booking-away-list" class="booking-list"></ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORT VIEW -->
+    <section id="report-view" class="view">
+      <div class="card card-strong">
+        <h2 class="section-title">Match report</h2>
+        <div id="report-content">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>Match report system – offline &amp; local only</div>
+    <div id="footer-status">Ready.</div>
+  </footer>
+
+  <!-- Confirmation modal -->
+  <div id="confirm-modal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-body card">
+      <h2>Confirm action</h2>
+      <div class="modal-text" id="confirm-message">
+        Are you sure?
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-small" id="confirm-cancel">Cancel</button>
+        <button class="btn btn-danger btn-small" id="confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+(function () {
+  const STORAGE_KEY = "soccer_ref_report_v1";
+
+  const initialState = () => ({
+    view: "preMatch",
+    preMatch: {
+      matchDate: "",
+      matchTime: "",
+      matchNumber: "",
+      competition: "",
+      venue: "",
+      homeTeam: "",
+      awayTeam: "",
+      refereeName: "",
+      assistant1Name: "",
+      assistant2Name: "",
+      fourthOfficialName: ""
+    },
+    notes: {
+      preMatch: "",
+      postMatch: ""
+    },
+    lineups: {
+      home: {
+        starters: Array.from({ length: 11 }, () => ""),
+        subs: Array.from({ length: 5 }, () => "")
+      },
+      away: {
+        starters: Array.from({ length: 11 }, () => ""),
+        subs: Array.from({ length: 5 }, () => "")
+      }
+    },
+    match: {
+      createdAt: new Date().toISOString(),
+      started: false,
+      finished: false,
+      phase: "pre", // pre | first | halftime | second | fulltime
+      currentHalf: 1,
+      isRunning: false,
+      timerSeconds: 0,
+      lastTick: null,
+      pauseStartWallTime: null,
+      stoppageByHalf: {
+        1: 0,
+        2: 0
+      },
+      scores: {
+        home: 0,
+        away: 0
+      },
+      goals: [],
+      events: [],
+      bookings: {
+        home: [],
+        away: []
+      },
+      substitutions: [],
+      activeLineups: {
+        home: [],
+        away: []
+      },
+      bench: {
+        home: [],
+        away: []
+      },
+      stoppageCountdownSeconds: 0,
+      stoppageCountdownActive: false,
+      stoppageCountdownHalf: null,
+      lineupApplied: false,
+      firstHalfEndTime: null,
+      secondHalfEndTime: null,
+      matchStartWallTime: null,
+      matchEndWallTime: null,
+      countdownActive: false,
+      countdown: 0
+    }
+  });
+
+  let state = initialState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      const base = initialState();
+      state = {
+        ...base,
+        ...parsed,
+        preMatch: { ...base.preMatch, ...(parsed.preMatch || {}) },
+        notes: { ...base.notes, ...(parsed.notes || {}) },
+        lineups: { ...base.lineups, ...(parsed.lineups || {}) },
+        match: { ...base.match, ...(parsed.match || {}) }
+      };
+      if (!state.match.stoppageByHalf) {
+        state.match.stoppageByHalf = { 1: 0, 2: 0 };
+      }
+    } catch (e) {
+      console.warn("Failed to load saved state", e);
+      state = initialState();
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setFooterStatus("Saved.");
+    } catch (e) {
+      console.warn("Failed to save state", e);
+      setFooterStatus("Storage disabled.");
+    }
+  }
+
+  function resetMatchKeepPreMatch() {
+    state.match = initialState().match;
+    saveState();
+    renderAll();
+  }
+
+  function resetAll() {
+    state = initialState();
+    saveState();
+    hydratePreMatchForm();
+    setView("preMatch");
+    renderAll();
+  }
+
+  function escapeHtml(str) {
+    if (str == null) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function formatTime(totalSeconds) {
+    const s = Math.max(0, Math.floor(totalSeconds || 0));
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+  }
+
+  function niceDate(dateStr) {
+    if (!dateStr) return "—";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString();
+    } catch {
+      return dateStr;
+    }
+  }
+
+  function niceTimeOnly(dateStr) {
+    if (!dateStr) return "—";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    } catch {
+      return dateStr;
+    }
+  }
+
+  function buildFixtureLine() {
+    const home = state.preMatch.homeTeam || "Home";
+    const away = state.preMatch.awayTeam || "Away";
+    return home + " vs " + away;
+  }
+
+  const HALF_DURATION_SECONDS = 45 * 60;
+  let timerInterval = null;
+  let countdownInterval = null;
+  let stoppageInterval = null;
+
+  const els = {};
+  const lineupInputs = {
+    home: { starters: [], subs: [] },
+    away: { starters: [], subs: [] }
+  };
+  const lineupLabels = {
+    home: { starters: null, subs: null },
+    away: { starters: null, subs: null }
+  };
+
+  function cacheDom() {
+    els.preMatchView = document.getElementById("pre-match-view");
+    els.liveView = document.getElementById("live-view");
+    els.reportView = document.getElementById("report-view");
+
+    els.headerFixture = document.getElementById("header-fixture");
+    els.headerCompetition = document.getElementById("header-competition");
+
+    els.preMatchForm = document.getElementById("pre-match-form");
+    els.startMatchBtn = document.getElementById("startMatchBtn");
+    els.preMatchStatusText = document.getElementById("pre-match-status-text");
+
+    els.matchDate = document.getElementById("matchDate");
+    els.matchTime = document.getElementById("matchTime");
+    els.matchNumber = document.getElementById("matchNumber");
+    els.competition = document.getElementById("competition");
+    els.venue = document.getElementById("venue");
+    els.homeTeam = document.getElementById("homeTeam");
+    els.awayTeam = document.getElementById("awayTeam");
+    els.refereeName = document.getElementById("refereeName");
+    els.assistant1Name = document.getElementById("assistant1Name");
+    els.assistant2Name = document.getElementById("assistant2Name");
+    els.fourthOfficialName = document.getElementById("fourthOfficialName");
+    els.preMatchNotes = document.getElementById("preMatchNotes");
+    els.lineupHomeCard = document.getElementById("lineup-home-card");
+    els.lineupAwayCard = document.getElementById("lineup-away-card");
+
+    els.liveFixtureLabel = document.getElementById("live-fixture-label");
+    els.matchStatusPill = document.getElementById("match-status-pill");
+    els.matchStatusText = document.getElementById("match-status-text");
+    els.matchHalfLabel = document.getElementById("match-half-label");
+    els.matchHalfText = document.getElementById("match-half-text");
+    els.mainTimer = document.getElementById("main-timer");
+    els.stoppageLabel = document.getElementById("stoppage-label");
+    els.halfTimeMarker = document.getElementById("half-time-marker");
+    els.stoppageTimer = document.getElementById("stoppage-display");
+    els.homeTag = document.getElementById("home-tag");
+    els.awayTag = document.getElementById("away-tag");
+    els.homeScoreMain = document.getElementById("home-score-main");
+    els.awayScoreMain = document.getElementById("away-score-main");
+    els.homeNameLabel = document.getElementById("home-name-label");
+    els.awayNameLabel = document.getElementById("away-name-label");
+    els.homeScoreSide = document.getElementById("home-score-side");
+    els.awayScoreSide = document.getElementById("away-score-side");
+
+    els.btnStart = document.getElementById("btn-start");
+    els.btnPause = document.getElementById("btn-pause");
+    els.btnReset = document.getElementById("btn-reset");
+    els.btnEndHalf = document.getElementById("btn-end-half");
+    els.btnEndMatch = document.getElementById("btn-end-match");
+    els.btnViewReport = document.getElementById("btn-view-report");
+
+    els.countdownOverlay = document.getElementById("countdown-overlay");
+    els.countdownNumber = document.getElementById("countdown-number");
+
+    els.liveEvents = document.getElementById("live-events");
+    els.liveComp = document.getElementById("live-comp");
+    els.liveVenue = document.getElementById("live-venue");
+    els.liveDate = document.getElementById("live-date");
+    els.liveTime = document.getElementById("live-time");
+    els.liveRef = document.getElementById("live-ref");
+
+    els.bookingTeam = document.getElementById("booking-team");
+    els.bookingPlayer = document.getElementById("booking-player");
+    els.bookingType = document.getElementById("booking-type");
+    els.bookingSubmit = document.getElementById("booking-submit");
+    els.bookingHomeTitle = document.getElementById("booking-home-title");
+    els.bookingAwayTitle = document.getElementById("booking-away-title");
+    els.bookingHomeList = document.getElementById("booking-home-list");
+    els.bookingAwayList = document.getElementById("booking-away-list");
+
+    els.subTeam = document.getElementById("sub-team");
+    els.subOn = document.getElementById("sub-on");
+    els.subOff = document.getElementById("sub-off");
+    els.subSubmit = document.getElementById("sub-submit");
+    els.subHistory = document.getElementById("sub-history");
+
+    els.reportContent = document.getElementById("report-content");
+
+    els.footerStatus = document.getElementById("footer-status");
+
+    els.confirmModal = document.getElementById("confirm-modal");
+    els.confirmMessage = document.getElementById("confirm-message");
+    els.confirmOk = document.getElementById("confirm-ok");
+    els.confirmCancel = document.getElementById("confirm-cancel");
+  }
+
+  function setFooterStatus(message) {
+    if (!els.footerStatus) return;
+    els.footerStatus.textContent = message;
+    setTimeout(() => {
+      if (els.footerStatus.textContent === message) {
+        els.footerStatus.textContent = "Ready.";
+      }
+    }, 3000);
+  }
+
+  let confirmCallback = null;
+
+  function openConfirm(message, onConfirm) {
+    els.confirmMessage.textContent = message;
+    confirmCallback = onConfirm;
+    els.confirmModal.classList.add("is-visible");
+  }
+
+  function closeConfirm() {
+    els.confirmModal.classList.remove("is-visible");
+    confirmCallback = null;
+  }
+
+  function setView(viewName) {
+    state.view = viewName;
+    if (els.preMatchView) {
+      els.preMatchView.classList.toggle("is-active", viewName === "preMatch");
+    }
+    if (els.liveView) {
+      els.liveView.classList.toggle("is-active", viewName === "live");
+    }
+    if (els.reportView) {
+      els.reportView.classList.toggle("is-active", viewName === "report");
+    }
+    saveState();
+    if (viewName === "report") {
+      renderReport();
+      setFooterStatus("Report ready.");
+    }
+  }
+
+  function hydratePreMatchForm() {
+    if (!els.matchDate) return;
+    els.matchDate.value = state.preMatch.matchDate || "";
+    els.matchTime.value = state.preMatch.matchTime || "";
+    els.matchNumber.value = state.preMatch.matchNumber || "";
+    els.competition.value = state.preMatch.competition || "";
+    els.venue.value = state.preMatch.venue || "";
+    els.homeTeam.value = state.preMatch.homeTeam || "";
+    els.awayTeam.value = state.preMatch.awayTeam || "";
+    els.refereeName.value = state.preMatch.refereeName || "";
+    els.assistant1Name.value = state.preMatch.assistant1Name || "";
+    els.assistant2Name.value = state.preMatch.assistant2Name || "";
+    els.fourthOfficialName.value = state.preMatch.fourthOfficialName || "";
+    els.preMatchNotes.value = state.notes.preMatch || "";
+    updatePreMatchValidity();
+  }
+
+  function updatePreMatchValidity() {
+    const requiredFields = [
+      "matchDate",
+      "matchTime",
+      "competition",
+      "venue",
+      "homeTeam",
+      "awayTeam",
+      "refereeName",
+      "assistant1Name",
+      "assistant2Name"
+    ];
+    const allFilled = requiredFields.every(id => {
+      const el = document.getElementById(id);
+      return el && el.value.trim().length > 0;
+    });
+    els.startMatchBtn.disabled = !allFilled;
+    els.preMatchStatusText.textContent = allFilled
+      ? "Press Start Match Setup to proceed to the live timer."
+      : "Fill required fields to continue.";
+  }
+
+  function bindPreMatchForm() {
+    els.preMatchForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (els.startMatchBtn.disabled) return;
+      state.preMatch.matchDate = els.matchDate.value || "";
+      state.preMatch.matchTime = els.matchTime.value || "";
+      state.preMatch.matchNumber = els.matchNumber.value || "";
+      state.preMatch.competition = els.competition.value || "";
+      state.preMatch.venue = els.venue.value || "";
+      state.preMatch.homeTeam = els.homeTeam.value || "";
+      state.preMatch.awayTeam = els.awayTeam.value || "";
+      state.preMatch.refereeName = els.refereeName.value || "";
+      state.preMatch.assistant1Name = els.assistant1Name.value || "";
+      state.preMatch.assistant2Name = els.assistant2Name.value || "";
+      state.preMatch.fourthOfficialName = els.fourthOfficialName.value || "";
+      state.notes.preMatch = els.preMatchNotes.value || "";
+      saveState();
+      renderHeader();
+      renderLiveState();
+      setView("live");
+    });
+
+    const mapping = [
+      ["matchDate", "matchDate"],
+      ["matchTime", "matchTime"],
+      ["matchNumber", "matchNumber"],
+      ["competition", "competition"],
+      ["venue", "venue"],
+      ["homeTeam", "homeTeam"],
+      ["awayTeam", "awayTeam"],
+      ["refereeName", "refereeName"],
+      ["assistant1Name", "assistant1Name"],
+      ["assistant2Name", "assistant2Name"],
+      ["fourthOfficialName", "fourthOfficialName"]
+    ];
+
+    mapping.forEach(([id, key]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", () => {
+        state.preMatch[key] = el.value || "";
+        saveState();
+        updatePreMatchValidity();
+        renderHeader();
+        renderLiveState();
+      });
+    });
+
+    els.preMatchNotes.addEventListener("input", () => {
+      state.notes.preMatch = els.preMatchNotes.value || "";
+      saveState();
+    });
+  }
+
+  function renderHeader() {
+    if (!els.headerFixture) return;
+    els.headerFixture.textContent = buildFixtureLine();
+    els.headerCompetition.textContent = state.preMatch.competition || "—";
+  }
+
+  function logEvent(type, detail, extras) {
+    const evt = {
+      id: state.match.events.length + 1,
+      type,
+      detail,
+      half: state.match.currentHalf,
+      matchTimeSeconds: state.match.timerSeconds,
+      timestamp: new Date().toISOString(),
+      ...(extras || {})
+    };
+    state.match.events.push(evt);
+  }
+
+  function describeEvent(evt) {
+    const time = formatTime(evt.matchTimeSeconds);
+    switch (evt.type) {
+      case "match_start":
+        return "Kick-off (" + time + ")";
+      case "pause":
+        return "Timer paused";
+      case "resume":
+        if (evt.stoppageSeconds != null) {
+          return "Resumed, +" + evt.stoppageSeconds + "s stoppage";
+        }
+        return "Timer resumed";
+      case "half_time":
+        return "Half-time (" + time + ")";
+      case "second_half_start":
+        return "Second half started (" + time + ")";
+      case "match_end":
+        return "Full time (" + time + ")";
+      case "booking":
+        return evt.detail || "Booking";
+      case "substitution":
+        return evt.detail || "Substitution";
+      case "goal":
+        return evt.detail || "Goal";
+      case "score_adjust":
+        return evt.detail || "Score correction";
+      default:
+        return evt.detail || evt.type;
+    }
+  }
+
+  function startCountdownForHalf(halfNumber, isFirstStart) {
+    clearInterval(countdownInterval);
+    state.match.currentHalf = halfNumber;
+    state.match.countdownActive = true;
+    state.match.countdown = 3;
+    state.match.stoppageCountdownActive = false;
+    state.match.stoppageCountdownSeconds = 0;
+    state.match.stoppageCountdownHalf = null;
+    if (stoppageInterval) {
+      clearInterval(stoppageInterval);
+      stoppageInterval = null;
+    }
+    state.match.timerSeconds = halfNumber === 1 ? 0 : HALF_DURATION_SECONDS;
+    state.match.lastTick = null;
+    if (halfNumber === 1) {
+      prepareLineupsForMatch();
+      state.match.phase = "first";
+      state.match.started = true;
+      state.match.matchStartWallTime = new Date().toISOString();
+    } else {
+      state.match.phase = "second";
+    }
+    state.match.isRunning = false;
+    saveState();
+    renderLiveState();
+
+    countdownInterval = setInterval(() => {
+      if (state.match.countdown > 1) {
+        state.match.countdown -= 1;
+        saveState();
+        renderLiveState();
+      } else {
+        clearInterval(countdownInterval);
+        state.match.countdownActive = false;
+        saveState();
+        renderLiveState();
+        if (isFirstStart) {
+          logEvent("match_start", "First half started");
+        } else {
+          logEvent("second_half_start", "Second half started");
+        }
+        saveState();
+        startTimerInternal();
+      }
+    }, 1000);
+  }
+
+  function startTimerInternal() {
+    if (state.match.isRunning) return;
+    state.match.isRunning = true;
+    state.match.lastTick = Date.now();
+    saveState();
+    renderLiveState();
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (!state.match.isRunning) return;
+      const now = Date.now();
+      const diff = now - (state.match.lastTick || now);
+      if (diff >= 900) {
+        const step = Math.floor(diff / 1000);
+        const half = state.match.currentHalf || 1;
+        const target = half === 1 ? HALF_DURATION_SECONDS : HALF_DURATION_SECONDS * 2;
+        const remaining = Math.max(target - state.match.timerSeconds, 0);
+        const advance = Math.min(step, remaining);
+        state.match.timerSeconds += advance;
+        state.match.lastTick = (state.match.lastTick || now) + advance * 1000;
+        if (state.match.timerSeconds >= target) {
+          state.match.timerSeconds = target;
+          state.match.isRunning = false;
+          clearInterval(timerInterval);
+          startStoppageCountdownForHalf(half);
+        }
+        saveState();
+        renderLiveState();
+      }
+    }, 250);
+  }
+
+  function startStoppageCountdownForHalf(halfNumber) {
+    clearInterval(stoppageInterval);
+    const stoppageSeconds = Math.max(0, Math.round((state.match.stoppageByHalf && state.match.stoppageByHalf[halfNumber]) || 0));
+    state.match.stoppageCountdownSeconds = stoppageSeconds;
+    state.match.stoppageCountdownHalf = halfNumber;
+    state.match.stoppageCountdownActive = stoppageSeconds > 0;
+    saveState();
+    renderLiveState();
+    if (stoppageSeconds <= 0) {
+      completeHalf(halfNumber);
+      return;
+    }
+    stoppageInterval = setInterval(() => {
+      if (state.match.stoppageCountdownSeconds <= 1) {
+        clearInterval(stoppageInterval);
+        stoppageInterval = null;
+        state.match.stoppageCountdownSeconds = 0;
+        state.match.stoppageCountdownActive = false;
+        state.match.stoppageCountdownHalf = null;
+        completeHalf(halfNumber);
+      } else {
+        state.match.stoppageCountdownSeconds -= 1;
+        saveState();
+        renderLiveState();
+      }
+    }, 1000);
+  }
+
+  function completeHalf(halfNumber) {
+    state.match.isRunning = false;
+    clearInterval(timerInterval);
+    state.match.lastTick = null;
+    if (halfNumber === 1) {
+      state.match.phase = "halftime";
+      state.match.firstHalfEndTime = new Date().toISOString();
+      logEvent("half_time", "First half ended");
+      state.match.timerSeconds = 0;
+      saveState();
+      renderLiveState();
+      return;
+    }
+    endMatch();
+  }
+
+  function pauseTimer() {
+    if (!state.match.isRunning || state.match.stoppageCountdownActive) return;
+    state.match.isRunning = false;
+    state.match.pauseStartWallTime = Date.now();
+    clearInterval(timerInterval);
+    logEvent("pause", "Timer paused");
+    saveState();
+    renderLiveState();
+  }
+
+  function resumeFromPause() {
+    const pausedAt = state.match.pauseStartWallTime;
+    const now = Date.now();
+    if (pausedAt) {
+      const deltaSec = Math.max(0, Math.round((now - pausedAt) / 1000));
+      const half = state.match.currentHalf || 1;
+      if (!state.match.stoppageByHalf) {
+        state.match.stoppageByHalf = { 1: 0, 2: 0 };
+      }
+      state.match.stoppageByHalf[half] = (state.match.stoppageByHalf[half] || 0) + deltaSec;
+      logEvent("resume", "Timer resumed", { stoppageSeconds: deltaSec });
+      state.match.pauseStartWallTime = null;
+    } else {
+      logEvent("resume", "Timer resumed");
+    }
+    saveState();
+    startTimerInternal();
+  }
+
+  function endFirstHalf() {
+    const now = Date.now();
+    if (state.match.pauseStartWallTime) {
+      const deltaSec = Math.max(0, Math.round((now - state.match.pauseStartWallTime) / 1000));
+      state.match.stoppageByHalf[1] = (state.match.stoppageByHalf[1] || 0) + deltaSec;
+      logEvent("resume", "Timer resumed at half-time", { stoppageSeconds: deltaSec });
+      state.match.pauseStartWallTime = null;
+    }
+    state.match.isRunning = false;
+    clearInterval(timerInterval);
+    state.match.timerSeconds = HALF_DURATION_SECONDS;
+    startStoppageCountdownForHalf(1);
+  }
+
+  function endMatch() {
+    const now = Date.now();
+    const half = state.match.currentHalf || 2;
+    if (state.match.pauseStartWallTime) {
+      const deltaSec = Math.max(0, Math.round((now - state.match.pauseStartWallTime) / 1000));
+      state.match.stoppageByHalf[half] = (state.match.stoppageByHalf[half] || 0) + deltaSec;
+      logEvent("resume", "Timer resumed at full time", { stoppageSeconds: deltaSec });
+      state.match.pauseStartWallTime = null;
+    }
+    state.match.isRunning = false;
+    clearInterval(timerInterval);
+    state.match.matchEndWallTime = new Date().toISOString();
+    state.match.phase = "fulltime";
+    state.match.finished = true;
+    logEvent("match_end", "Match finished");
+    saveState();
+    renderLiveState();
+  }
+
+  function adjustScore(teamKey, delta) {
+    const isGoal = delta > 0;
+    const teamName = teamKey === "home" ? (state.preMatch.homeTeam || "Home") : (state.preMatch.awayTeam || "Away");
+    if (isGoal) {
+      state.match.scores[teamKey] += 1;
+      const homeScore = state.match.scores.home;
+      const awayScore = state.match.scores.away;
+      const detail = "Goal for " + teamName + " (" + homeScore + "-" + awayScore + ")";
+      logEvent("goal", detail, {
+        team: teamKey,
+        homeScore,
+        awayScore
+      });
+      state.match.goals.push({
+        id: state.match.goals.length + 1,
+        team: teamKey,
+        teamName,
+        half: state.match.currentHalf,
+        matchTimeSeconds: state.match.timerSeconds,
+        homeScore,
+        awayScore
+      });
+    } else {
+      const current = state.match.scores[teamKey];
+      if (current <= 0) {
+        setFooterStatus("Score cannot go below zero.");
+        return;
+      }
+      state.match.scores[teamKey] = current - 1;
+      const homeScore = state.match.scores.home;
+      const awayScore = state.match.scores.away;
+      const detail = "Score correction for " + teamName + " (-1) => " + homeScore + "-" + awayScore;
+      logEvent("score_adjust", detail, {
+        team: teamKey,
+        homeScore,
+        awayScore
+      });
+      const lastIndex = state.match.goals
+        .map((g, idx) => ({ g, idx }))
+        .filter(x => x.g.team === teamKey)
+        .map(x => x.idx)
+        .pop();
+      if (lastIndex != null) {
+        state.match.goals.splice(lastIndex, 1);
+      }
+    }
+    saveState();
+    renderLiveState();
+  }
+
+  function getTeamDisplayName(team) {
+    return team === "home" ? state.preMatch.homeTeam || "Home" : state.preMatch.awayTeam || "Away";
+  }
+
+  function getActivePlayersForTeam(team) {
+    const lineup = state.match.activeLineups && state.match.activeLineups[team];
+    if (lineup && lineup.length) {
+      return lineup;
+    }
+    return cleanJerseyList((state.lineups[team] && state.lineups[team].starters) || []);
+  }
+
+  function getBenchPlayersForTeam(team) {
+    const bench = state.match.bench && state.match.bench[team];
+    if (bench && bench.length) {
+      return bench;
+    }
+    return cleanJerseyList((state.lineups[team] && state.lineups[team].subs) || []);
+  }
+
+  function refreshBookingPlayers() {
+    if (!els.bookingPlayer || !els.bookingTeam) return;
+    const team = els.bookingTeam.value || "home";
+    const players = getActivePlayersForTeam(team);
+    const previous = els.bookingPlayer.value;
+    els.bookingPlayer.innerHTML =
+      '<option value="">Select player</option>' +
+      players
+        .map(num => `<option value="${num}">${num}</option>`)
+        .join("");
+    if (players.includes(previous)) {
+      els.bookingPlayer.value = previous;
+    }
+  }
+
+  function updateTeamSelectOptions() {
+    const homeLabel = escapeHtml(state.preMatch.homeTeam || "Home");
+    const awayLabel = escapeHtml(state.preMatch.awayTeam || "Away");
+    const optionMarkup =
+      '<option value="">Select team</option>' +
+      '<option value="home">' +
+      homeLabel +
+      "</option>" +
+      '<option value="away">' +
+      awayLabel +
+      "</option>";
+    const selects = [els.bookingTeam, els.subTeam];
+    selects.forEach(selectEl => {
+      if (!selectEl) return;
+      const prevValue = selectEl.value;
+      selectEl.innerHTML = optionMarkup;
+      if (prevValue === "home" || prevValue === "away") {
+        selectEl.value = prevValue;
+      }
+    });
+  }
+
+  function refreshSubstitutionSelects() {
+    if (!els.subTeam || !els.subOn || !els.subOff) return;
+    const team = els.subTeam.value || "home";
+    const bench = getBenchPlayersForTeam(team);
+    const lineup = getActivePlayersForTeam(team);
+    const prevOn = els.subOn.value;
+    const prevOff = els.subOff.value;
+    els.subOn.innerHTML =
+      '<option value="">Substitute</option>' +
+      bench
+        .map(num => `<option value="${num}">${num}</option>`)
+        .join("");
+    els.subOff.innerHTML =
+      '<option value="">Starter</option>' +
+      lineup
+        .map(num => `<option value="${num}">${num}</option>`)
+        .join("");
+    if (bench.includes(prevOn)) {
+      els.subOn.value = prevOn;
+    }
+    if (lineup.includes(prevOff)) {
+      els.subOff.value = prevOff;
+    }
+  }
+
+  function renderBookingLists() {
+    if (!els.bookingHomeList || !els.bookingAwayList) return;
+    ["home", "away"].forEach(team => {
+      const container = team === "home" ? els.bookingHomeList : els.bookingAwayList;
+      const bookings = (state.match.bookings && state.match.bookings[team]) || [];
+      if (!bookings.length) {
+        container.innerHTML = '<li class="booking-item">No bookings recorded.</li>';
+        return;
+      }
+      container.innerHTML = bookings
+        .map(entry => {
+          const timeLabel = formatTime(entry.matchTimeSeconds);
+          const halfLabel = entry.half === 1 ? "1st" : "2nd";
+          const cardClass =
+            entry.cardType === "Red" ? "booking-card-pill booking-card-pill--red" : "booking-card-pill booking-card-pill--yellow";
+          const cardLabel = entry.cardType === "Red" ? "R" : "Y";
+          return (
+            '<li class="booking-item"><span>#' +
+            entry.jersey +
+            '</span><span class="' +
+            cardClass +
+            '">' +
+            cardLabel +
+            "</span><span>" +
+            halfLabel +
+            " " +
+            timeLabel +
+            "</span></li>"
+          );
+        })
+        .join("");
+    });
+  }
+
+  function renderSubstitutionHistory() {
+    if (!els.subHistory) return;
+    const history = state.match.substitutions || [];
+    if (!history.length) {
+      els.subHistory.innerHTML = '<li class="sub-item">No substitutions recorded.</li>';
+      return;
+    }
+    els.subHistory.innerHTML = history
+      .map(entry => {
+        const halfLabel = entry.half === 1 ? "1st" : "2nd";
+        return (
+          '<li class="sub-item"><div>' +
+          getTeamDisplayName(entry.team) +
+          "</div><span>" +
+          halfLabel +
+          " " +
+          formatTime(entry.matchTimeSeconds) +
+          " · " +
+          entry.on +
+          " on for " +
+          entry.off +
+          "</span></li>"
+        );
+      })
+      .join("");
+  }
+
+  function handleBookingSubmit() {
+    if (!els.bookingTeam || !els.bookingPlayer || !els.bookingType) return;
+    const team = els.bookingTeam.value;
+    const jersey = els.bookingPlayer.value;
+    let cardType = els.bookingType.value || "Yellow";
+    if (!team || !jersey) {
+      setFooterStatus("Select team and player before recording a booking.");
+      return;
+    }
+    if (!state.match.bookings) {
+      state.match.bookings = { home: [], away: [] };
+    }
+    const bookings = state.match.bookings[team] || [];
+    const hasYellow = bookings.some(entry => entry.jersey === jersey && entry.cardType === "Yellow");
+    if (cardType === "Yellow" && hasYellow) {
+      cardType = "Red";
+      alert("Player already has a yellow card. Logging a red instead.");
+    }
+    const entry = {
+      id: bookings.length + 1,
+      half: state.match.currentHalf || 1,
+      matchTimeSeconds: state.match.timerSeconds,
+      jersey,
+      cardType
+    };
+    bookings.push(entry);
+    state.match.bookings[team] = bookings;
+    logEvent("booking", `${cardType} card for #${jersey}`, { team, jersey, cardType });
+    saveState();
+    renderLiveState();
+  }
+
+  function handleSubstitutionSubmit() {
+    if (!els.subTeam || !els.subOn || !els.subOff) return;
+    const team = els.subTeam.value;
+    const onPlayer = els.subOn.value;
+    const offPlayer = els.subOff.value;
+    if (!team || !onPlayer || !offPlayer) {
+      setFooterStatus("Select a team plus players on/off.");
+      return;
+    }
+    const lineup = state.match.activeLineups[team] || [];
+    const bench = state.match.bench[team] || [];
+    if (!lineup.includes(offPlayer) || !bench.includes(onPlayer)) {
+      setFooterStatus("Selected players are not available for substitution.");
+      return;
+    }
+    const updatedLineup = lineup.map(num => (num === offPlayer ? onPlayer : num));
+    const updatedBench = bench.filter(num => num !== onPlayer);
+    if (!updatedBench.includes(offPlayer)) {
+      updatedBench.push(offPlayer);
+    }
+    state.match.activeLineups[team] = updatedLineup;
+    state.match.bench[team] = updatedBench;
+    const substitution = {
+      id: state.match.substitutions.length + 1,
+      half: state.match.currentHalf || 1,
+      matchTimeSeconds: state.match.timerSeconds,
+      team,
+      on: onPlayer,
+      off: offPlayer
+    };
+    state.match.substitutions.push(substitution);
+    logEvent("substitution", `${getTeamDisplayName(team)} substitution`, {
+      team,
+      on: onPlayer,
+      off: offPlayer
+    });
+    saveState();
+    renderLiveState();
+  }
+
+  function renderLiveEvents() {
+    if (!els.liveEvents) return;
+    const events = state.match.events.slice(-6).reverse();
+    if (!events.length) {
+      els.liveEvents.innerHTML = '<li class="event-empty">Events will show here once the match starts.</li>';
+      return;
+    }
+    els.liveEvents.innerHTML = events
+      .map(evt => {
+        const time = formatTime(evt.matchTimeSeconds);
+        const desc = escapeHtml(describeEvent(evt));
+        return '<li class="event-item"><span class="event-time">' +
+          time +
+          '</span><span class="event-type">' +
+          desc +
+          "</span></li>";
+      })
+      .join("");
+  }
+
+  function renderLiveState() {
+    if (!els.mainTimer) return;
+
+    const homeName = state.preMatch.homeTeam || "Home";
+    const awayName = state.preMatch.awayTeam || "Away";
+
+    els.liveFixtureLabel.textContent = buildFixtureLine();
+    els.homeTag.textContent = homeName;
+    els.awayTag.textContent = awayName;
+    els.homeNameLabel.textContent = homeName;
+    els.awayNameLabel.textContent = awayName;
+    els.homeScoreMain.textContent = state.match.scores.home;
+    els.awayScoreMain.textContent = state.match.scores.away;
+    els.homeScoreSide.textContent = state.match.scores.home;
+    els.awayScoreSide.textContent = state.match.scores.away;
+
+    const mainTimerValue = formatTime(state.match.timerSeconds);
+    const stoppageActive = state.match.stoppageCountdownActive;
+    if (els.mainTimer) {
+      els.mainTimer.textContent = mainTimerValue;
+      els.mainTimer.classList.toggle("is-hidden", stoppageActive);
+    }
+    if (els.stoppageTimer) {
+      if (stoppageActive) {
+        els.stoppageTimer.textContent = "+" + formatTime(state.match.stoppageCountdownSeconds);
+        els.stoppageTimer.classList.add("is-visible");
+      } else {
+        els.stoppageTimer.classList.remove("is-visible");
+      }
+    }
+
+    const half = state.match.currentHalf || 1;
+    els.matchHalfText.textContent = half === 1 ? "First half" : "Second half";
+
+    let statusText = "Pre match";
+    let pillClass = "badge badge-pre";
+    if (state.match.phase === "first" || state.match.phase === "second") {
+      if (state.match.stoppageCountdownActive) {
+        statusText = "Stoppage";
+        pillClass = "badge badge-paused";
+      } else if (state.match.isRunning) {
+        statusText = "Live";
+        pillClass = "badge badge-live";
+      } else {
+        statusText = "Paused";
+        pillClass = "badge badge-paused";
+      }
+    } else if (state.match.phase === "halftime") {
+      statusText = "Half-time";
+      pillClass = "badge badge-paused";
+    } else if (state.match.phase === "fulltime") {
+      statusText = "Full time";
+      pillClass = "badge badge-full";
+    }
+    els.matchStatusText.textContent = statusText;
+    els.matchStatusPill.className = pillClass + " badge";
+
+    const halfLabelText =
+      state.match.phase === "halftime"
+        ? "Half-time"
+        : half === 1
+        ? "First half"
+        : "Second half";
+    els.matchHalfText.textContent = halfLabelText;
+
+    const halfStoppage = (state.match.stoppageByHalf && state.match.stoppageByHalf[half]) || 0;
+    if (stoppageActive) {
+      const label = "+" + formatTime(state.match.stoppageCountdownSeconds);
+      els.stoppageLabel.textContent = "Stoppage countdown: " + label;
+      els.stoppageLabel.classList.add("is-hot");
+    } else {
+      els.stoppageLabel.textContent = "Stoppage this half: " + formatTime(halfStoppage);
+      if (state.match.phase === "first" && state.match.timerSeconds >= HALF_DURATION_SECONDS && halfStoppage > 0) {
+        els.stoppageLabel.classList.add("is-hot");
+      } else {
+        els.stoppageLabel.classList.remove("is-hot");
+      }
+    }
+
+    if (!state.match.started) {
+      els.halfTimeMarker.textContent = "Ready for kick-off";
+    } else if (state.match.phase === "first" && state.match.isRunning) {
+      els.halfTimeMarker.textContent = "First half in play";
+    } else if (state.match.phase === "first" && !state.match.isRunning) {
+      els.halfTimeMarker.textContent = "First half paused";
+    } else if (state.match.phase === "halftime") {
+      els.halfTimeMarker.textContent = "Half-time. Use Start to begin second half.";
+    } else if (state.match.phase === "second" && state.match.isRunning) {
+      els.halfTimeMarker.textContent = "Second half in play";
+    } else if (state.match.phase === "second" && !state.match.isRunning) {
+      els.halfTimeMarker.textContent = "Second half paused";
+    } else if (state.match.phase === "fulltime") {
+      els.halfTimeMarker.textContent = "Match finished";
+    }
+
+    els.liveComp.textContent = state.preMatch.competition || "—";
+    els.liveVenue.textContent = state.preMatch.venue || "—";
+    els.liveRef.textContent = state.preMatch.refereeName || "—";
+    els.liveDate.textContent = state.preMatch.matchDate || "—";
+    els.liveTime.textContent = state.preMatch.matchTime || "—";
+
+    if (els.bookingHomeTitle) {
+      els.bookingHomeTitle.textContent = homeName + " bookings";
+    }
+    if (els.bookingAwayTitle) {
+      els.bookingAwayTitle.textContent = awayName + " bookings";
+    }
+
+    els.btnPause.disabled =
+      !state.match.isRunning || state.match.phase === "fulltime" || state.match.stoppageCountdownActive;
+    els.btnReset.disabled = !state.match.started && !state.match.finished && state.match.timerSeconds === 0;
+
+    let startLabel = "Start";
+    if (state.match.phase === "pre") {
+      startLabel = "Start first half";
+    } else if (state.match.phase === "halftime") {
+      startLabel = "Start second half";
+    } else if (!state.match.isRunning && state.match.started && !state.match.finished) {
+      startLabel = "Resume";
+    }
+    els.btnStart.textContent = startLabel;
+    els.btnStart.disabled =
+      state.match.phase === "fulltime" || state.match.stoppageCountdownActive;
+
+    els.btnEndHalf.style.display = "none";
+
+    els.btnEndMatch.style.display =
+      state.match.phase === "second" || state.match.phase === "fulltime"
+        ? "inline-flex"
+        : "none";
+    els.btnEndMatch.disabled = state.match.phase === "fulltime";
+
+    els.btnViewReport.style.display = state.match.finished ? "inline-flex" : "none";
+
+    if (state.match.countdownActive) {
+      els.countdownOverlay.classList.add("is-visible");
+      els.countdownNumber.textContent = state.match.countdown;
+    } else {
+      els.countdownOverlay.classList.remove("is-visible");
+    }
+
+    updateLineupHeadings();
+    renderBookingLists();
+    renderSubstitutionHistory();
+    updateTeamSelectOptions();
+    refreshBookingPlayers();
+    refreshSubstitutionSelects();
+
+    renderLiveEvents();
+  }
+
+  function renderReport() {
+    const pm = state.preMatch;
+    const m = state.match;
+    const reportEl = els.reportContent;
+    if (!reportEl) return;
+
+    const firstStoppage = (m.stoppageByHalf && m.stoppageByHalf[1]) || 0;
+    const secondStoppage = (m.stoppageByHalf && m.stoppageByHalf[2]) || 0;
+
+    let goalsRows = "";
+    if (!m.goals.length) {
+      goalsRows =
+        '<tr><td colspan="5">No goals recorded.</td></tr>';
+    } else {
+      goalsRows = m.goals
+        .map((g, idx) => {
+          return (
+            "<tr>" +
+            "<td>" + (idx + 1) + "</td>" +
+            "<td>" + (g.half === 1 ? "1st" : "2nd") + "</td>" +
+            "<td>" + formatTime(g.matchTimeSeconds) + "</td>" +
+            "<td>" + escapeHtml(g.teamName || (g.team === "home" ? pm.homeTeam : pm.awayTeam)) + "</td>" +
+            "<td>" + g.homeScore + "-" + g.awayScore + "</td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+    }
+
+    let eventsRows = "";
+    if (!m.events.length) {
+      eventsRows = '<tr><td colspan="7">No events recorded.</td></tr>';
+    } else {
+      eventsRows = m.events
+        .map(evt => {
+          const wc = niceTimeOnly(evt.timestamp);
+          return (
+            "<tr>" +
+            "<td>" + evt.id + "</td>" +
+            "<td>" + (evt.half === 1 ? "1st" : "2nd") + "</td>" +
+            "<td>" + formatTime(evt.matchTimeSeconds) + "</td>" +
+            "<td>" + escapeHtml(evt.type) + "</td>" +
+            "<td>" + escapeHtml(evt.detail || "") + "</td>" +
+            "<td>" + (evt.stoppageSeconds != null ? evt.stoppageSeconds : "") + "</td>" +
+            "<td>" + escapeHtml(wc) + "</td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+    }
+
+    const bookingList = [];
+    const bookingSource = m.bookings || { home: [], away: [] };
+    (bookingSource.home || []).forEach(entry => bookingList.push({ team: "home", ...entry }));
+    (bookingSource.away || []).forEach(entry => bookingList.push({ team: "away", ...entry }));
+    let bookingRows = "";
+    if (!bookingList.length) {
+      bookingRows = '<tr><td colspan="5">No bookings recorded.</td></tr>';
+    } else {
+      bookingRows = bookingList
+        .map((entry, idx) => {
+          const halfLabel = entry.half === 1 ? "1st" : "2nd";
+          const cardClass =
+            entry.cardType === "Red" ? "booking-card-pill booking-card-pill--red" : "booking-card-pill booking-card-pill--yellow";
+          const cardLabel = entry.cardType === "Red" ? "R" : "Y";
+          return (
+            "<tr>" +
+            "<td>" + (idx + 1) + "</td>" +
+            "<td>" + escapeHtml(getTeamDisplayName(entry.team)) + "</td>" +
+            "<td>" + halfLabel + "</td>" +
+            "<td>" + formatTime(entry.matchTimeSeconds) + "</td>" +
+            "<td>" + entry.jersey + "</td>" +
+            '<td><span class="' +
+            cardClass +
+            '">' +
+            cardLabel +
+            "</span></td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+    }
+
+    const substitutionList = m.substitutions || [];
+    let substitutionRows = "";
+    if (!substitutionList.length) {
+      substitutionRows = '<tr><td colspan="6">No substitutions recorded.</td></tr>';
+    } else {
+      substitutionRows = substitutionList
+        .map((entry, idx) => {
+          const halfLabel = entry.half === 1 ? "1st" : "2nd";
+          return (
+            "<tr>" +
+            "<td>" + (idx + 1) + "</td>" +
+            "<td>" + escapeHtml(getTeamDisplayName(entry.team)) + "</td>" +
+            "<td>" + halfLabel + "</td>" +
+            "<td>" + formatTime(entry.matchTimeSeconds) + "</td>" +
+            "<td>" + entry.on + "</td>" +
+            "<td>" + entry.off + "</td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+    }
+
+    const matchStartNice = m.matchStartWallTime ? niceTimeOnly(m.matchStartWallTime) : "—";
+    const matchEndNice = m.matchEndWallTime ? niceTimeOnly(m.matchEndWallTime) : "—";
+
+    reportEl.innerHTML =
+      '<div class="report-layout">' +
+      '<div>' +
+      '<div class="report-header">' +
+      '<div class="report-chip">' +
+      '<div class="report-chip-label">Competition</div>' +
+      '<div class="report-chip-value">' + escapeHtml(pm.competition || "—") + "</div>" +
+      "</div>" +
+      '<div class="report-chip">' +
+      '<div class="report-chip-label">Venue</div>' +
+      '<div class="report-chip-value">' + escapeHtml(pm.venue || "—") + "</div>" +
+      "</div>" +
+      '<div class="report-chip">' +
+      '<div class="report-chip-label">Date</div>' +
+      '<div class="report-chip-value">' + escapeHtml(pm.matchDate || "—") + "</div>" +
+      "</div>" +
+      '<div class="report-chip">' +
+      '<div class="report-chip-label">Kickoff time</div>' +
+      '<div class="report-chip-value">' + escapeHtml(pm.matchTime || "—") + "</div>" +
+      "</div>" +
+      "</div>" +
+
+      '<div class="scoreline-row">' +
+      '<div class="scoreline-team">' + escapeHtml(pm.homeTeam || "Home") + "</div>" +
+      '<div class="scoreline-main">' +
+      escapeHtml(String(m.scores.home)) +
+      " - " +
+      escapeHtml(String(m.scores.away)) +
+      "</div>" +
+      '<div class="scoreline-team">' + escapeHtml(pm.awayTeam || "Away") + "</div>" +
+      "</div>" +
+
+      '<div class="card" style="margin-bottom:0.75rem;">' +
+      '<h3 class="section-title">Officials</h3>' +
+      '<ul class="official-list">' +
+      '<li><span class="badge-role">Referee</span>' + escapeHtml(pm.refereeName || "—") + "</li>" +
+      '<li><span class="badge-role">Assistant 1</span>' + escapeHtml(pm.assistant1Name || "—") + "</li>" +
+      '<li><span class="badge-role">Assistant 2</span>' + escapeHtml(pm.assistant2Name || "—") + "</li>" +
+      '<li><span class="badge-role">Fourth official</span>' + escapeHtml(pm.fourthOfficialName || "—") + "</li>" +
+      "</ul>" +
+      "</div>" +
+
+      '<div class="card" style="margin-bottom:0;">' +
+      '<h3 class="section-title">Stoppage summary</h3>' +
+      '<div class="table-wrap">' +
+      "<table>" +
+      "<thead><tr><th>Half</th><th>Stoppage (mm:ss)</th></tr></thead>" +
+      "<tbody>" +
+      "<tr><td>First</td><td>" + formatTime(firstStoppage) + "</td></tr>" +
+      "<tr><td>Second</td><td>" + formatTime(secondStoppage) + "</td></tr>" +
+      "</tbody></table></div>" +
+      '<div class="helper">Stoppage is computed from all timer pauses and resumes.</div>' +
+      "</div>" +
+
+      '<div class="card">' +
+      '<h3 class="section-title">Bookings</h3>' +
+      '<div class="table-wrap">' +
+      "<table>" +
+      "<thead><tr><th>#</th><th>Team</th><th>Half</th><th>Time</th><th>Jersey</th><th>Card</th></tr></thead>" +
+      "<tbody>" +
+      bookingRows +
+      "</tbody></table></div>" +
+      "</div>" +
+
+      '<div class="card">' +
+      '<h3 class="section-title">Substitutions</h3>' +
+      '<div class="table-wrap">' +
+      "<table>" +
+      "<thead><tr><th>#</th><th>Team</th><th>Half</th><th>Time</th><th>On</th><th>Off</th></tr></thead>" +
+      "<tbody>" +
+      substitutionRows +
+      "</tbody></table></div>" +
+      "</div>" +
+
+      '<div class="card">' +
+      '<h3 class="section-title">Notes</h3>' +
+      '<div class="note-label-row">' +
+      "<span>Pre-match notes</span>" +
+      "</div>" +
+      '<textarea class="note-area" data-note-type="preMatch">' +
+      escapeHtml(state.notes.preMatch || "") +
+      "</textarea>" +
+
+      '<div class="note-label-row" style="margin-top:0.75rem;">' +
+      "<span>Post-match notes</span>" +
+      "</div>" +
+      '<textarea class="note-area" data-note-type="postMatch" placeholder="Incidents, conduct, special notes…">' +
+      escapeHtml(state.notes.postMatch || "") +
+      "</textarea>" +
+
+      '<div style="margin-top:0.5rem; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em;">' +
+      '<span class="pill pill-green"><span class="pill-dot"></span>Kick-off: ' +
+      escapeHtml(matchStartNice) +
+      "</span> " +
+      '<span class="pill pill-blue"><span class="pill-dot"></span>Full time: ' +
+      escapeHtml(matchEndNice) +
+      "</span>" +
+      "</div>" +
+      "</div>" +
+      "</div>" +
+
+      '<div>' +
+      '<div class="card">' +
+      '<h3 class="section-title">Timeline</h3>' +
+      '<div class="table-wrap">' +
+      "<table>" +
+      "<thead><tr><th>#</th><th>Half</th><th>Time</th><th>Type</th><th>Details</th><th>Stoppage (s)</th><th>Wall clock</th></tr></thead>" +
+      "<tbody>" +
+      eventsRows +
+      "</tbody></table></div>" +
+      "</div>" +
+
+      '<div class="card">' +
+      '<h3 class="section-title">Scoring summary</h3>' +
+      '<div class="table-wrap">' +
+      "<table>" +
+      "<thead><tr><th>#</th><th>Half</th><th>Time</th><th>Team</th><th>Score at time</th></tr></thead>" +
+      "<tbody>" +
+      goalsRows +
+      "</tbody></table></div>" +
+      "</div>" +
+
+      '<div class="report-actions">' +
+      '<button class="btn btn-primary print-hide" data-report-action="download-image">Download report image</button>' +
+      '<button class="btn btn-ghost print-hide" data-report-action="back-to-live">Back to live view</button>' +
+      '<button class="btn btn-danger print-hide" data-report-action="new-match">Start new match</button>' +
+      "</div>" +
+      "</div>" +
+      "</div>";
+  }
+
+  function printReport() {
+    window.print();
+  }
+
+  function exportReportAsImage() {
+    const reportRoot = document.querySelector("#report-content .report-layout");
+    if (!reportRoot) {
+      setFooterStatus("Report layout unavailable.");
+      return;
+    }
+    if (typeof html2canvas !== "function") {
+      setFooterStatus("Image export library not loaded.");
+      return;
+    }
+    const actions = reportRoot.querySelector(".report-actions");
+    const previousActionsDisplay = actions ? actions.style.display : null;
+    if (actions) {
+      actions.style.display = "none";
+    }
+    reportRoot.classList.add("export-padding");
+    setFooterStatus("Preparing report image…");
+    html2canvas(reportRoot, {
+      backgroundColor: "#fefcf5",
+      scale: window.devicePixelRatio || 2,
+      useCORS: true,
+      logging: false
+    })
+      .then(canvas => {
+        return new Promise((resolve, reject) => {
+          canvas.toBlob(blob => {
+            if (!blob) {
+              reject(new Error("Failed to render report image."));
+              return;
+            }
+            resolve(blob);
+          }, "image/png");
+        });
+      })
+      .then(blob => {
+        const link = document.createElement("a");
+        const blobUrl = URL.createObjectURL(blob);
+        link.href = blobUrl;
+        link.download = "match-report.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setFooterStatus("Report image ready.");
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      })
+      .catch(() => {
+        setFooterStatus("Failed to render report image.");
+      })
+      .finally(() => {
+        reportRoot.classList.remove("export-padding");
+        if (actions) {
+          actions.style.display = previousActionsDisplay || "";
+        }
+      });
+  }
+
+  function bindLiveControls() {
+    els.btnStart.addEventListener("click", () => {
+      if (!state.match.started && state.match.phase === "pre") {
+        openConfirm("Start first half with 3-2-1 countdown?", () => {
+          closeConfirm();
+          startCountdownForHalf(1, true);
+        });
+      } else if (state.match.phase === "halftime") {
+        openConfirm("Start second half with 3-2-1 countdown?", () => {
+          closeConfirm();
+          startCountdownForHalf(2, false);
+        });
+      } else if (!state.match.isRunning && state.match.started && !state.match.finished) {
+        openConfirm("Resume timer?", () => {
+          closeConfirm();
+          resumeFromPause();
+        });
+      }
+    });
+
+    els.btnPause.addEventListener("click", () => {
+      if (!state.match.isRunning) return;
+      openConfirm("Pause timer and start stoppage tracking?", () => {
+        closeConfirm();
+        pauseTimer();
+      });
+    });
+
+    els.btnReset.addEventListener("click", () => {
+      openConfirm("Reset timer, scores and events for this match?", () => {
+        closeConfirm();
+        resetMatchKeepPreMatch();
+      });
+    });
+
+    els.btnEndHalf.addEventListener("click", () => {
+      if (state.match.phase !== "first") return;
+      openConfirm("Confirm end of first half?", () => {
+        closeConfirm();
+        endFirstHalf();
+      });
+    });
+
+    els.btnEndMatch.addEventListener("click", () => {
+      if (state.match.phase === "fulltime") return;
+      openConfirm("Confirm end of match and lock in final score?", () => {
+        closeConfirm();
+        endMatch();
+      });
+    });
+
+    els.btnViewReport.addEventListener("click", () => {
+      setView("report");
+    });
+
+    document.body.addEventListener("click", ev => {
+      const btn = ev.target.closest("[data-score-team]");
+      if (!btn) return;
+      const team = btn.getAttribute("data-score-team");
+      const delta = parseInt(btn.getAttribute("data-score-delta"), 10) || 0;
+      if (!team || !delta) return;
+      if (delta > 0) {
+        openConfirm("Confirm goal for " + (team === "home" ? (state.preMatch.homeTeam || "Home") : (state.preMatch.awayTeam || "Away")) + "?", () => {
+          closeConfirm();
+          adjustScore(team, +1);
+        });
+      } else {
+        openConfirm("Reduce score by 1 for " + (team === "home" ? (state.preMatch.homeTeam || "Home") : (state.preMatch.awayTeam || "Away")) + " and log a correction?", () => {
+          closeConfirm();
+          adjustScore(team, -1);
+        });
+      }
+    });
+  }
+
+  function bindBookingControls() {
+    if (els.bookingTeam) {
+      els.bookingTeam.addEventListener("change", refreshBookingPlayers);
+    }
+    if (els.bookingSubmit) {
+      els.bookingSubmit.addEventListener("click", handleBookingSubmit);
+    }
+  }
+
+  function bindSubstitutionControls() {
+    if (els.subTeam) {
+      els.subTeam.addEventListener("change", () => {
+        refreshSubstitutionSelects();
+        refreshBookingPlayers();
+      });
+    }
+    if (els.subSubmit) {
+      els.subSubmit.addEventListener("click", handleSubstitutionSubmit);
+    }
+  }
+
+  function bindReportControls() {
+    els.reportView.addEventListener("click", ev => {
+      const actionBtn = ev.target.closest("[data-report-action]");
+      if (actionBtn) {
+        const action = actionBtn.getAttribute("data-report-action");
+        if (action === "download-image") {
+          exportReportAsImage();
+        } else if (action === "download-pdf") {
+          printReport();
+        } else if (action === "back-to-live") {
+          setView("live");
+        } else if (action === "new-match") {
+          openConfirm("Start a brand new match and clear all data?", () => {
+            closeConfirm();
+            resetAll();
+          });
+        }
+      }
+    });
+
+    els.reportView.addEventListener("input", ev => {
+      const ta = ev.target;
+      if (!ta || ta.tagName !== "TEXTAREA") return;
+      const type = ta.getAttribute("data-note-type");
+      if (type === "preMatch") {
+        state.notes.preMatch = ta.value || "";
+      } else if (type === "postMatch") {
+        state.notes.postMatch = ta.value || "";
+      }
+      saveState();
+    });
+  }
+
+  function bindModal() {
+    els.confirmOk.addEventListener("click", () => {
+      if (typeof confirmCallback === "function") {
+        const cb = confirmCallback;
+        confirmCallback = null;
+        cb();
+      } else {
+        closeConfirm();
+      }
+    });
+
+    els.confirmCancel.addEventListener("click", () => {
+      closeConfirm();
+    });
+
+    els.confirmModal.addEventListener("click", ev => {
+      if (ev.target === els.confirmModal || ev.target.classList.contains("modal-backdrop")) {
+        closeConfirm();
+      }
+    });
+
+    document.addEventListener("keydown", ev => {
+      if (ev.key === "Escape" && els.confirmModal.classList.contains("is-visible")) {
+        closeConfirm();
+      }
+    });
+  }
+
+  function buildLineupMarkup(teamKey) {
+    const starterInputs = Array.from({ length: 11 })
+      .map((_, idx) => {
+        return `
+          <div class="lineup-field">
+            <label for="${teamKey}-starter-${idx}">Starter ${idx + 1}</label>
+            <input
+              id="${teamKey}-starter-${idx}"
+              data-lineup-team="${teamKey}"
+              data-lineup-type="starter"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="3"
+            />
+          </div>
+        `;
+      })
+      .join("");
+    const subInputs = Array.from({ length: 5 })
+      .map((_, idx) => {
+        return `
+          <div class="lineup-field">
+            <label for="${teamKey}-sub-${idx}">Sub ${idx + 1}</label>
+            <input
+              id="${teamKey}-sub-${idx}"
+              data-lineup-team="${teamKey}"
+              data-lineup-type="sub"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="3"
+            />
+          </div>
+        `;
+      })
+      .join("");
+
+    return `
+      <span class="lineup-card-heading" id="lineup-${teamKey}-starters-label">Starters</span>
+      <div class="lineup-grid">
+        ${starterInputs}
+      </div>
+      <span class="lineup-card-heading lineup-card-heading--subs" id="lineup-${teamKey}-subs-label">Substitutes</span>
+      <div class="lineup-grid lineup-grid--subs">
+        ${subInputs}
+      </div>
+    `;
+  }
+
+  function initLineupInputs() {
+    ["home", "away"].forEach(team => {
+      const container = team === "home" ? els.lineupHomeCard : els.lineupAwayCard;
+      if (!container) return;
+      container.innerHTML = buildLineupMarkup(team);
+      lineupInputs[team].starters = Array.from(container.querySelectorAll(`[data-lineup-team="${team}"][data-lineup-type="starter"]`));
+      lineupInputs[team].subs = Array.from(container.querySelectorAll(`[data-lineup-team="${team}"][data-lineup-type="sub"]`));
+      lineupInputs[team].starters.forEach((input, idx) => {
+        input.addEventListener("input", () => {
+          state.lineups[team].starters[idx] = input.value.trim();
+          saveState();
+        });
+      });
+      lineupInputs[team].subs.forEach((input, idx) => {
+        input.addEventListener("input", () => {
+          state.lineups[team].subs[idx] = input.value.trim();
+          saveState();
+        });
+      });
+      lineupLabels[team].starters = document.getElementById(`lineup-${team}-starters-label`);
+      lineupLabels[team].subs = document.getElementById(`lineup-${team}-subs-label`);
+    });
+  }
+
+  function hydrateLineupInputs() {
+    ["home", "away"].forEach(team => {
+      const data = state.lineups[team] || { starters: [], subs: [] };
+      lineupInputs[team].starters.forEach((input, idx) => {
+        if (!input) return;
+        input.value = data.starters[idx] || "";
+      });
+      lineupInputs[team].subs.forEach((input, idx) => {
+        if (!input) return;
+        input.value = data.subs[idx] || "";
+      });
+    });
+  }
+
+  function updateLineupHeadings() {
+    ["home", "away"].forEach(team => {
+      const displayName = team === "home" ? state.preMatch.homeTeam || "Home" : state.preMatch.awayTeam || "Away";
+      if (lineupLabels[team].starters) {
+        lineupLabels[team].starters.textContent = `${displayName} starters`;
+      }
+      if (lineupLabels[team].subs) {
+        lineupLabels[team].subs.textContent = `${displayName} substitutes`;
+      }
+    });
+  }
+
+  function cleanJerseyList(values) {
+    return (Array.isArray(values) ? values : [])
+      .map(value => String(value || "").trim())
+      .filter(Boolean);
+  }
+
+  function prepareLineupsForMatch() {
+    if (state.match.lineupApplied) return;
+    state.match.activeLineups.home = cleanJerseyList(state.lineups.home.starters);
+    state.match.activeLineups.away = cleanJerseyList(state.lineups.away.starters);
+    state.match.bench.home = cleanJerseyList(state.lineups.home.subs);
+    state.match.bench.away = cleanJerseyList(state.lineups.away.subs);
+    state.match.bookings = { home: [], away: [] };
+    state.match.substitutions = [];
+    state.match.lineupApplied = true;
+    saveState();
+  }
+
+  function renderAll() {
+    renderHeader();
+    hydratePreMatchForm();
+    hydrateLineupInputs();
+    renderLiveState();
+    if (state.view === "report") {
+      renderReport();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    cacheDom();
+    initLineupInputs();
+    loadState();
+
+    if (state.view === "preMatch") {
+      setView("preMatch");
+    } else if (state.view === "report") {
+      setView("report");
+    } else {
+      setView("live");
+    }
+
+    cacheDom();
+    bindPreMatchForm();
+    bindLiveControls();
+    bindBookingControls();
+    bindSubstitutionControls();
+    bindReportControls();
+    bindModal();
+    renderAll();
+  });
+})();
+</script>
+</body>
+</html>
