@@ -3135,6 +3135,72 @@
     }
   }
 
+  /**
+   * After a page reload, resume any in-progress timers based on the
+   * persisted match state so the clock continues without manual input.
+   */
+  function resumeTimersFromPersistedState() {
+    const m = state.match || {};
+    const now = Date.now();
+
+    // If the main match timer was running when we last saved, catch up
+    // any elapsed wall-clock time and restart the ticking interval.
+    if (
+      m.isRunning &&
+      !m.countdownActive &&
+      !m.stoppageCountdownActive &&
+      m.phase !== "fulltime"
+    ) {
+      const lastTickMs = m.lastTick || now;
+      const elapsedSec = Math.max(0, Math.floor((now - lastTickMs) / 1000));
+      if (elapsedSec > 0) {
+        const half = m.currentHalf || 1;
+        const target = half === 1 ? HALF_DURATION_SECONDS : HALF_DURATION_SECONDS * 2;
+        const remaining = Math.max(target - m.timerSeconds, 0);
+        const advance = Math.min(elapsedSec, remaining);
+        m.timerSeconds += advance;
+
+        // If we reached the end of the half while the page was closed,
+        // move straight into stoppage time for that half.
+        if (m.timerSeconds >= target) {
+          m.timerSeconds = target;
+          m.isRunning = false;
+          m.lastTick = null;
+          saveState();
+          startStoppageCountdownForHalf(half);
+          return;
+        }
+      }
+
+      // Restart the ticking interval from "now".
+      m.lastTick = Date.now();
+      saveState();
+      startTimerInternal();
+    }
+
+    // If we were already in a stoppage countdown, resume it from the
+    // remaining countdown seconds so it continues after reload.
+    if (m.stoppageCountdownActive && m.stoppageCountdownSeconds > 0) {
+      clearInterval(stoppageInterval);
+      stoppageInterval = setInterval(() => {
+        if (state.match.stoppageCountdownSeconds <= 1) {
+          clearInterval(stoppageInterval);
+          stoppageInterval = null;
+          state.match.stoppageCountdownSeconds = 0;
+          state.match.stoppageCountdownActive = false;
+          const halfToComplete =
+            state.match.stoppageCountdownHalf || state.match.currentHalf || 1;
+          state.match.stoppageCountdownHalf = null;
+          completeHalf(halfToComplete);
+        } else {
+          state.match.stoppageCountdownSeconds -= 1;
+          saveState();
+          renderLiveState();
+        }
+      }, 1000);
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     cacheDom();
     initLineupInputs();
@@ -3156,6 +3222,8 @@
     bindReportControls();
     bindModal();
     renderAll();
+    // Ensure any in-progress timers continue seamlessly after a reload.
+    resumeTimersFromPersistedState();
   });
 })();
 </script>
